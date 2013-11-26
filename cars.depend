@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # depslib dependency file v1.0
 1385485878 source:c:\users\makasha\desktop\open gl\cars\cars.cpp
 	<stdio.h>
@@ -5,3 +6,12 @@
 	<math.h>
 	<GL/glut.h>
 
+=======
+# depslib dependency file v1.0
+1385471487 source:c:\users\makasha\desktop\open gl\cars\cars.cpp
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<GL/glut.h>
+
+>>>>>>> 10f443bee751df27a10264cc580a191f54428eeb
