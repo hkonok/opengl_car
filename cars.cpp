@@ -11,8 +11,12 @@
 #define LIGHT_GREEN 0.125, 0.698, 0.667
 #define DARK_GREEN 0.000, 0.502, 0.502
 
+#define LIGHT_RED 0.647, 0.165, 0.165
+#define DARK_RED 0.502, 0.000, 0.000
+
 #define LIGHT_WHITE 0.961, 0.961, 0.961
 #define DARK_WHITE 0.502, 0.502, 0.502
+#define DEEP_DARK_WHITE 0.412, 0.412, 0.412
 
 //make a global variable -- for tracking the anglular position of camera
 double cameraAngle;			//in radian
@@ -24,6 +28,8 @@ double cameraRadius;
 double rectAngle;	//in degree
 
 bool canDrawGrid;
+
+GLUquadric*  	qobj;
 
 void car_top(){
     //car top
@@ -356,6 +362,88 @@ void left_side_window_divider(){
             }glEnd();
 }
 
+void back_side_body(){
+    //back side of back glass
+            glBegin(GL_POLYGON);{
+                glColor3f(DARK_GREEN);
+                glVertex3f(21,-9,20);//right low
+                glVertex3f(-6,-9,20);//right low
+
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(-7,-9,18);//right low
+                glVertex3f(22,-9,18);//right low
+            }glEnd();
+
+            glBegin(GL_POLYGON);{
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(-7,-9,18);//right low
+                glVertex3f(22,-9,18);//right low
+
+                glColor3f(DARK_GREEN);
+                glVertex3f(22,-10,15);//right low
+                glVertex3f(-7,-10,15);//right low
+            }glEnd();
+
+            // red light left
+            glBegin(GL_POLYGON);{
+                glColor3f(LIGHT_RED);
+                glVertex3f(-1.5,-10,15);//right low
+                glVertex3f(-7,-10,15);//right low
+
+                glColor3f(DARK_RED);
+                glVertex3f(-7,-10.2,11.2);//right low
+                glVertex3f(-1.5,-10.2,11.2);//right low
+            }glEnd();
+
+            // red light right
+            glBegin(GL_POLYGON);{
+                glColor3f(LIGHT_RED);
+                glVertex3f(16.5,-10,15);//right low
+                glVertex3f(22,-10,15);//right low
+
+                glColor3f(DARK_RED);
+                glVertex3f(22,-10.2,11.2);//right low
+                glVertex3f(16.5,-10.2,11.2);//right low
+            }glEnd();
+
+            // place between two lines
+            glBegin(GL_POLYGON);{
+                glColor3f(DARK_GREEN);
+                glVertex3f(16.5,-10,15);//right low
+                glVertex3f(-1.5,-10,15);//right low
+
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(-1.5,-10.2,11.2);//right low
+                glVertex3f(16.5,-10.2,11.2);//right low
+
+            }glEnd();
+
+            //last part of back side
+            glBegin(GL_POLYGON);{
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(22,-10.2,11.2);//right low
+                glVertex3f(-7,-10.2,11.2);//right low
+
+                glColor3f(DARK_GREEN);
+                glVertex3f(-7,-10.5,7);//right low
+                glVertex3f(22.5,-10.5,7);//right low
+
+            }glEnd();
+}
+
+void create_triangle_x(double x,double z,double radius, double resolution)
+{
+    /* top triangle */
+    double PI = 3.1416;
+    double i;
+    glBegin(GL_TRIANGLE_FAN);
+        glVertex3f(x, 0, z);  /* center */
+            for (i = 0; i <= 2 * PI; i += resolution)
+                glVertex3f(x, radius * cos(i), z+radius * sin(i));
+        glVertex3f(x, radius * cos(i), z+radius * sin(i));
+    glEnd();
+}
+
 
 void display(){
 
@@ -409,9 +497,85 @@ void display(){
 		left_side_window();
 		left_side_window_divider();
 
+        back_side_body();
+
+        //between front and front glass
+        glBegin(GL_POLYGON);{
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(21,40,20);//right low
+                glVertex3f(-6,40,20);//right low
+
+                glColor3f(DARK_GREEN);
+                glVertex3f(-7,40,18);//right low
+                glVertex3f(22,40,18);//right low
+            }glEnd();
+        //front hood
+        glBegin(GL_POLYGON);{
+                glColor3f(DARK_GREEN);
+                glVertex3f(-7,40,18);//right low
+                glVertex3f(22,40,18);//right low
+
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(21,52,15);//right low
+                glVertex3f(-6,52,15);//right low
+            }glEnd();
+        //small curv after front hood
+        glBegin(GL_POLYGON);{
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(-6,52,15);//right low
+                glVertex3f(21,52,15);//right low
+
+                glColor3f(DARK_GREEN);
+                glVertex3f(21,53,12);//right low
+                glVertex3f(-6,53,12);//right low
+            }glEnd();
+        //front end
+        glBegin(GL_POLYGON);{
+                glColor3f(DARK_GREEN);
+                glVertex3f(-6,53,12);//right low
+                glVertex3f(21,53,12);//right low
+
+                glColor3f(LIGHT_GREEN);
+                glVertex3f(21,54,7);//right low
+                glVertex3f(-6,54,7);//right low
+            }glEnd();
+
+       //front right
+       glBegin(GL_POLYGON);{
+                glColor3f(DARK_GREEN);
+                glVertex3f(21,54,7);//right low
+                glVertex3f(21,53,12);//right low
+                glVertex3f(21,52,15);//right low
+                glVertex3f(22,40,18);//right low
+                glVertex3f(21,40,7);//right low
+       }glEnd();
+
+       //front left
+       glBegin(GL_POLYGON);{
+                glColor3f(DARK_GREEN);
+                glVertex3f(-6,54,7);//right low
+                glVertex3f(-6,53,12);//right low
+                glVertex3f(-6,52,15);//right low
+                glVertex3f(-7,40,18);//right low
+                glVertex3f(-6,40,7);//right low
+       }glEnd();
+
 	}glPopMatrix();		//the effect of rotation is not there now.
 
 	//some gridlines along the field
+    glPushMatrix();{
+        glColor3f(DEEP_DARK_WHITE);
+
+        //glTranslatef(10,-20,50);
+        glTranslatef(20,0,7);
+        glRotatef(90,0,1,0);
+        // gluCylinder(qobject,radiouts at base, radious at top, height, slices, stacks)
+        gluCylinder(qobj, 6, 6, 4, 15, 20);
+    }glPopMatrix();
+
+    glColor3f(DARK_WHITE);
+    create_triangle_x(24,7,6,0.3);
+
 	int i;
 
 	//WILL draw grid IF the "canDrawGrid" is true:
@@ -561,6 +725,9 @@ void init(){
 	//clear the screen
 	glClearColor(WHITE, 0);
 
+	// cylinder
+    qobj = gluNewQuadric();
+    gluQuadricNormals(qobj, GLU_SMOOTH);
 	/************************
 	/ set-up projection here
 	************************/
@@ -601,6 +768,9 @@ int main(int argc, char **argv){
 	glutMouseFunc(mouseListener);
 
 	glutMainLoop();		//The main loop of OpenGL
+
+    //cleanup
+	gluDeleteQuadric(qobj);
 
 	return 0;
 }
