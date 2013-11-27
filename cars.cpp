@@ -23,8 +23,21 @@
 #define RILL_DELTA 2
 #define DEVIDER_LEN 25
 
+#define START_LAMP -200
+#define LAMP_DELTA 2
+#define END_LAMP -400
+#define LAMP_INTERVAL 200
+
 #define START_ANGLE 4
 #define END_ANGLE 5.5
+
+#define MAX_CAMERA_HEIGHT 100
+#define MIN_CAMERA_HEIGHT 10
+
+#define LAMP_COLOR 0.184, 0.310, 0.310
+#define LIGHT_COLOR 0.914, 0.588, 0.478
+
+#define DELTA 0.001
 
 
 #define SKY_TOP 1.000, 1.000, 1.000
@@ -34,16 +47,22 @@ double cameraAngle;			//in radian
 double cameraAngleDelta;
 
 double cameraHeight;
+double cameraHeightDelta = 0.05;
 double cameraRadius;
 
 double rectAngle;	//in degree
+double lamp_start;
 
 bool canDrawGrid;
 bool camera_angle_inc;
+bool camera_height_inc;
+
+
+bool move_enable;
 
 double car_move = START_RILL;
 
-GLUquadric*  	qobj;
+GLUquadric *qobj;
 
 void car_top(){
     //car top
@@ -751,6 +770,83 @@ void draw_car(){
     create_wheel(-9, 30, 7, 6, 4);
 }
 
+void create_lamp(double x,double y,double z,double height){
+    double radius = 2.00*height/100.00;
+
+    glPushMatrix();
+    {
+        glColor3f(LAMP_COLOR);
+        //glTranslatef(10,-20,50);
+        glTranslatef(x, y, z);
+        glRotatef(90,0,0,1);
+        // qobject, radious bottom, radious top, height, slice , slice
+        gluCylinder(qobj, radius, 3.00*radius/2.00, 5.00*height/100.00, 10, 10);
+    }glPopMatrix();
+    glPushMatrix();
+    {
+        glColor3f(LAMP_COLOR);
+        //glTranslatef(10,-20,50);
+        glTranslatef(x, y, z+5.00*height/100.00);
+        glRotatef(90,0,0.0,1);
+        // qobject, radious bottom, radious top, height, slice , slice
+        gluCylinder(qobj, 3.00*radius/2.00, 3.00*radius/2.00, 0.5*height/100.00, 10, 10);
+    }glPopMatrix();
+
+    glPushMatrix();
+    {
+        glColor3f(LAMP_COLOR);
+        //glTranslatef(10,-20,50);
+        glTranslatef(x, y, z+5.5*height/100.00);
+        glRotatef(90,0,0.0,1);
+        // qobject, radious bottom, radious top, height, slice , slice
+        gluCylinder(qobj, 3.00*radius/2.00, radius, 5.0*height/100.00, 10, 10);
+    }glPopMatrix();
+
+    glPushMatrix();
+    {
+        glColor3f(LAMP_COLOR);
+        //glTranslatef(10,-20,50);
+        glTranslatef(x, y, z+10.5*height/100.00);
+        glRotatef(90,0,0.0,1);
+        // qobject, radious bottom, radious top, height, slice , slice
+        gluCylinder(qobj, radius, radius/2, 90*height/100.00, 50, 50);
+    }glPopMatrix();
+
+    glPushMatrix();
+    {
+        glColor3f(LAMP_COLOR);
+        //glTranslatef(10,-20,50);
+        glTranslatef(x, y, height);
+        glRotatef(90,0,1,0);
+        // qobject, radious bottom, radious top, height, slice , slice
+        gluCylinder(qobj, 0.5*radius/2.00, 0.5*radius/2.00, 10*height/100.00, 50, 15);
+    }glPopMatrix();
+
+    //void glutSolidSphere(GLdouble radius,GLint slices, GLint stacks);
+    double equ[4];
+
+        equ[0] = 1;	//0.x
+        equ[1] = 0;	//0.y
+        equ[2] = 0;//-1.z x + 10*height/100.00
+
+        equ[3] = (-1.00)*(x + 10*height/100.00);//30
+
+        glClipPlane(GL_CLIP_PLANE0,equ);
+        //now we enable the clip plane
+
+   // glEnable(GL_CLIP_PLANE0);{
+    glEnable(GL_CLIP_PLANE0);{
+        glColor3f(LIGHT_COLOR);
+            glPushMatrix();{
+                glTranslatef(x+15.00*height/100.00, y+.4, height);
+                glScalef(3, 1, 0.5);
+
+                glutSolidSphere(5*height/100.00, 20.00*height/100.00, 20.00*height/100.00);
+            }glPopMatrix();
+   }glDisable(GL_CLIP_PLANE0);
+   //}glDisable(GL_CLIP_PLANE0);
+}
+
 void display(){
 
     //clear the display
@@ -788,6 +884,8 @@ void display(){
 
         draw_sky();
 
+
+
     glPushMatrix();
     {
 
@@ -818,6 +916,24 @@ void display(){
 
         }
        }glPopMatrix();
+    /*
+    x ,y ,z, height
+    */
+   // glPushMatrix();
+   // {
+    for(double lamp_tmp = lamp_start; lamp_tmp <=1000; lamp_tmp += LAMP_INTERVAL){
+            double lamp_x,lamp_x1,lamp_x2,lamp_y1,lamp_y2;
+            lamp_x1 = -53;
+            lamp_x2 = -3;
+            lamp_y1 = -400;
+            lamp_y2 = 1000;
+            lamp_x = (lamp_tmp - lamp_y1)*(lamp_x2 - lamp_x1)/(lamp_y2 - lamp_y1) + lamp_x1;
+            create_lamp(lamp_x, lamp_tmp, 0.00, 120 - 10.00*(lamp_tmp + 500.00 - 100.00)/200.00);
+        }
+
+    //}
+    //glPopMatrix();
+
 
 
     glutSwapBuffers();
@@ -825,27 +941,46 @@ void display(){
 
 void animate(){
     //codes for any changes in Camera
-    if(camera_angle_inc == false){
-        cameraAngle += cameraAngleDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
-        if(cameraAngle >= END_ANGLE)
-            camera_angle_inc =true;
-    }
-    else {
-        cameraAngle -= cameraAngleDelta;
-        if(cameraAngle <= START_ANGLE)
-                    camera_angle_inc =false;
-    }
+    if(move_enable){
+        if(camera_angle_inc == false){
+            cameraAngle += cameraAngleDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
+            if(cameraAngle >= END_ANGLE)
+                camera_angle_inc =true;
+        }
+        else {
+            cameraAngle -= cameraAngleDelta;
+            if(cameraAngle <= START_ANGLE)
+                        camera_angle_inc =false;
+        }
 
-    //codes for any changes in Models
 
-    if(car_move <= 0){
-        car_move = START_RILL;
-    }
-    else{
-        car_move -= RILL_DELTA;
-    }
+        if(camera_height_inc == false){
+            cameraHeight += cameraHeightDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
+            if(cameraHeight >= MAX_CAMERA_HEIGHT)
+                camera_height_inc =true;
+        }
+        else {
+            cameraHeight -= cameraHeightDelta;
+            if(cameraHeight <= MIN_CAMERA_HEIGHT)
+                        camera_height_inc =false;
+        }
 
-    rectAngle -= 1;
+
+        //codes for any changes in Models
+
+        if(car_move <= 0){
+            car_move = START_RILL;
+        }
+        else{
+            car_move -= RILL_DELTA;
+        }
+
+        lamp_start -= LAMP_DELTA;
+        if(lamp_start <= END_LAMP)
+            lamp_start = START_LAMP;
+
+        rectAngle -= 1;
+    }
 
     //MISSING SOMETHING? -- YES: add the following
     glutPostRedisplay();	//this will call the display AGAIN
@@ -855,19 +990,23 @@ void keyboardListener(unsigned char key, int x,int y){
     switch(key){
 
         case '1':	//reverse the rotation of camera
-            cameraAngleDelta = -cameraAngleDelta;
+           // cameraAngleDelta = -cameraAngleDelta;
             break;
 
         case '2':	//increase rotation of camera by 10%
-            cameraAngleDelta *= 1.1;
+           // cameraAngleDelta *= 1.1;
             break;
 
         case '3':	//decrease rotation
-            cameraAngleDelta /= 1.1;
+          //  cameraAngleDelta /= 1.1;
             break;
+        case '5':
+              move_enable = false;
+              break;
 
         case '8':	//toggle grids
-            canDrawGrid = 1 - canDrawGrid;
+           // canDrawGrid = 1 - canDrawGrid;
+            move_enable = true;
             break;
 
         case 27:	//ESCAPE KEY -- simply exit
@@ -944,15 +1083,19 @@ void init(){
     cameraAngleDelta = 0.002;
     rectAngle = 0;
     canDrawGrid = true;
-    cameraHeight = 120;
+    cameraHeight = MIN_CAMERA_HEIGHT;
+    camera_height_inc = true;
     cameraRadius = 180;
-
+    move_enable = true;
     //clear the screen
     glClearColor(WHITE, 0);
+
+    lamp_start = START_LAMP;
 
     // cylinder
     qobj = gluNewQuadric();
     gluQuadricNormals(qobj, GLU_SMOOTH);
+
     /************************
     / set-up projection here
     ************************/
