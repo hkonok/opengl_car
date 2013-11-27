@@ -23,6 +23,9 @@
 #define RILL_DELTA 2
 #define DEVIDER_LEN 25
 
+#define START_ANGLE 4
+#define END_ANGLE 5.5
+
 
 #define SKY_TOP 1.000, 1.000, 1.000
 
@@ -36,6 +39,7 @@ double cameraRadius;
 double rectAngle;	//in degree
 
 bool canDrawGrid;
+bool camera_angle_inc;
 
 double car_move = START_RILL;
 
@@ -603,6 +607,149 @@ void car_doors(){
        }glEnd();
 }
 
+void draw_road(){
+    //road border
+    glBegin(GL_POLYGON);{
+            glColor3f(0.412, 0.412, 0.412);
+            glVertex3f(-50,-400,1);//right low
+            glVertex3f(-5,1000,1);//right low
+            glVertex3f(-2,1000,1);//right low
+            glVertex3f(-45,-400,1);//right low
+
+   }glEnd();
+   glBegin(GL_POLYGON);{
+            glColor3f(0.412, 0.412, 0.412);
+            glVertex3f(80,-400,1);//right low
+            glVertex3f(5,1000,1);//right low
+            glVertex3f(2,1000,1);//right low
+            glVertex3f(75,-400,1);//right low
+
+   }glEnd();
+   //0.663, 0.663, 0.663
+   //0.827, 0.827, 0.827
+   //main road
+   glBegin(GL_POLYGON);{
+            glColor3f(0.663, 0.663, 0.663);
+            glVertex3f(-45,-400,1);
+            glVertex3f(-2,1000,1);
+
+            glColor3f(0.827, 0.827, 0.827);
+            glVertex3f(0,1000,1);
+            glVertex3f(15,-400,1);
+
+   }glEnd();
+   glBegin(GL_POLYGON);{
+            glColor3f(0.827, 0.827, 0.827);
+            glVertex3f(0,1000,1);
+            glVertex3f(15,-400,1);
+
+            glColor3f(0.663, 0.663, 0.663);
+            glVertex3f(75,-400,1);
+            glVertex3f(2,1000,1);
+    }glEnd();
+}
+
+void draw_grass(){
+    //grass
+
+    glBegin(GL_POLYGON);{
+             glColor3f(0.741, 0.718, 0.420);
+             glVertex3f(-50,-400,1);
+             glVertex3f(-5,1000,1);
+
+
+             glColor3f(0.941, 0.902, 0.549);
+             glVertex3f(-800,1000,1);
+             glVertex3f(-800,-400,1);
+
+
+    }glEnd();
+
+    glBegin(GL_POLYGON);{
+             glColor3f(0.741, 0.718, 0.420);
+             glVertex3f(80,-400,1);
+             glVertex3f(5,1000,1);
+
+
+             glColor3f(0.941, 0.902, 0.549);
+             glVertex3f(800,1000,1);
+             glVertex3f(800,-400,1);
+
+
+    }glEnd();
+
+}
+
+void draw_sky(){
+    //sky
+    //sky front
+   glBegin(GL_POLYGON);{
+            glColor3f(0.678, 0.847, 0.902);
+            glVertex3f(-800,1000,-10);
+            glVertex3f(800,1000,-10);
+
+            glColor3f(SKY_TOP);
+            glVertex3f(900,1000,200);
+            glVertex3f(-900,1000,200);
+   }glEnd();
+
+   //sky left
+   glBegin(GL_POLYGON);{
+            glColor3f(0.678, 0.847, 0.902);
+            glVertex3f(-800,1000,-10);
+            glVertex3f(-800,-400,-10);
+
+            glColor3f(SKY_TOP);
+            glVertex3f(-900,-400,200);
+            glVertex3f(-900,1000,200);
+   }glEnd();
+
+   //sky right
+   glBegin(GL_POLYGON);{
+            glColor3f(0.678, 0.847, 0.902);
+            glVertex3f(800,1000,-10);
+            glVertex3f(800,-400,-10);
+
+            glColor3f(SKY_TOP);
+            glVertex3f(900,-400,200);
+            glVertex3f(900,1000,200);
+   }glEnd();
+
+    //sky back
+    glBegin(GL_POLYGON);{
+            glColor3f(0.678, 0.847, 0.902);
+            glVertex3f(-800,-400,-10);
+            glVertex3f(800,-400,-10);
+
+            glColor3f(SKY_TOP);
+            glVertex3f(900,-400,200);
+            glVertex3f(-900,-400,200);
+   }glEnd();
+
+}
+
+void draw_car(){
+    car_top();
+    front_n_back_glass();
+
+    top_right_frame();
+    right_side_window();
+    right_side_window_divider();
+
+    top_left_frame();
+    left_side_window();
+    left_side_window_divider();
+
+    back_side_body();
+    front_body();
+
+    car_doors();
+    create_wheel(20, 0, 7, 6, 4);
+    create_wheel(-9, 0, 7, 6, 4);
+
+    create_wheel(20, 30, 7, 6, 4);
+    create_wheel(-9, 30, 7, 6, 4);
+}
 
 void display(){
 
@@ -616,16 +763,14 @@ void display(){
     ********************/
     //load the correct matrix -- MODEL-VIEW matrix
     glMatrixMode(GL_MODELVIEW);
-
     //initialize the matrix
     glLoadIdentity();
-    //now give three info
-    //1. where is the camera (viewer)?
-    //2. where is the camera is looking?
-    //3. Which direction is the camera's UP direction?
-
-    //instead of CONSTANT information, we will define a circular path.
-//	gluLookAt(-30,-30,50,	0,0,0,	0,0,1);
+    /*
+     *  now give three info
+     *  1. where is the camera (viewer)?
+     *  2. where is the camera is looking?
+     *  3. Which direction is the camera's UP direction?
+     */
 
     gluLookAt(cameraRadius*cos(cameraAngle), cameraRadius*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
     //NOTE: the camera still CONSTANTLY looks at the center
@@ -635,165 +780,13 @@ void display(){
     //again select MODEL-VIEW
     glMatrixMode(GL_MODELVIEW);
 
+        draw_car();
 
-    /****************************
-    / Add your objects from here
-    ****************************/
-    //add objects
-    //rotate this rectangle around the Z axis
+        draw_road();
 
-//	glPushMatrix();{
-        //drawing car
-        car_top();
-        front_n_back_glass();
+        draw_grass();
 
-        top_right_frame();
-        right_side_window();
-        right_side_window_divider();
-
-        top_left_frame();
-        left_side_window();
-        left_side_window_divider();
-
-        back_side_body();
-        front_body();
-
-        car_doors();
-        //road border
-        glBegin(GL_POLYGON);{
-                glColor3f(0.412, 0.412, 0.412);
-                glVertex3f(-50,-400,1);//right low
-                glVertex3f(-5,1000,1);//right low
-                glVertex3f(-2,1000,1);//right low
-                glVertex3f(-45,-400,1);//right low
-
-       }glEnd();
-       glBegin(GL_POLYGON);{
-                glColor3f(0.412, 0.412, 0.412);
-                glVertex3f(80,-400,1);//right low
-                glVertex3f(5,1000,1);//right low
-                glVertex3f(2,1000,1);//right low
-                glVertex3f(75,-400,1);//right low
-
-       }glEnd();
-       //0.663, 0.663, 0.663
-       //0.827, 0.827, 0.827
-       //main road
-       glBegin(GL_POLYGON);{
-                glColor3f(0.663, 0.663, 0.663);
-                glVertex3f(-45,-400,1);
-                glVertex3f(-2,1000,1);
-
-                glColor3f(0.827, 0.827, 0.827);
-                glVertex3f(0,1000,1);
-                glVertex3f(15,-400,1);
-
-       }glEnd();
-       glBegin(GL_POLYGON);{
-                glColor3f(0.827, 0.827, 0.827);
-                glVertex3f(0,1000,1);
-                glVertex3f(15,-400,1);
-
-                glColor3f(0.663, 0.663, 0.663);
-                glVertex3f(75,-400,1);
-                glVertex3f(2,1000,1);
-       }glEnd();
-
-       //grass
-
-       glBegin(GL_POLYGON);{
-                glColor3f(0.741, 0.718, 0.420);
-                glVertex3f(-50,-400,1);
-                glVertex3f(-5,1000,1);
-
-
-                glColor3f(0.941, 0.902, 0.549);
-                glVertex3f(-800,1000,1);
-                glVertex3f(-800,-400,1);
-
-
-       }glEnd();
-
-       glBegin(GL_POLYGON);{
-                glColor3f(0.741, 0.718, 0.420);
-                glVertex3f(80,-400,1);
-                glVertex3f(5,1000,1);
-
-
-                glColor3f(0.941, 0.902, 0.549);
-                glVertex3f(800,1000,1);
-                glVertex3f(800,-400,1);
-
-
-       }glEnd();
-
-        //sky
-        //sky front
-       glBegin(GL_POLYGON);{
-                glColor3f(0.678, 0.847, 0.902);
-                glVertex3f(-800,1000,-10);
-                glVertex3f(800,1000,-10);
-
-                glColor3f(SKY_TOP);
-                glVertex3f(900,1000,200);
-                glVertex3f(-900,1000,200);
-       }glEnd();
-
-       //sky left
-       glBegin(GL_POLYGON);{
-                glColor3f(0.678, 0.847, 0.902);
-                glVertex3f(-800,1000,-10);
-                glVertex3f(-800,-400,-10);
-
-                glColor3f(SKY_TOP);
-                glVertex3f(-900,-400,200);
-                glVertex3f(-900,1000,200);
-       }glEnd();
-
-       //sky right
-       glBegin(GL_POLYGON);{
-                glColor3f(0.678, 0.847, 0.902);
-                glVertex3f(800,1000,-10);
-                glVertex3f(800,-400,-10);
-
-                glColor3f(SKY_TOP);
-                glVertex3f(900,-400,200);
-                glVertex3f(900,1000,200);
-       }glEnd();
-
-        //sky back
-        glBegin(GL_POLYGON);{
-                glColor3f(0.678, 0.847, 0.902);
-                glVertex3f(-800,-400,-10);
-                glVertex3f(800,-400,-10);
-
-                glColor3f(SKY_TOP);
-                glVertex3f(900,-400,200);
-                glVertex3f(-900,-400,200);
-       }glEnd();
-
-
-
-  //  }glPopMatrix();		//the effect of rotation is not there now.
-    //create wheel
-    //create_wheel(double x, double y, double z, double radious, double width)
-
-    create_wheel(20, 0, 7, 6, 4);
-    create_wheel(-9, 0, 7, 6, 4);
-
-    create_wheel(20, 30, 7, 6, 4);
-    create_wheel(-9, 30, 7, 6, 4);
-
-/*
-    glBegin(GL_POLYGON);{
-            glColor3f(0,0,0);
-            glVertex3f(-4, -400, 2.5);
-            glVertex3f(1, 1000, 2.5);
-
-            glVertex3f(-1, 1000, 2.5);
-            glVertex3f(4, -400, 2.5);
-   }glEnd();
-   */
+        draw_sky();
 
     glPushMatrix();
     {
@@ -814,21 +807,12 @@ void display(){
                     glColor3f(DEEP_DARK_WHITE);
                     glVertex3f(x_left, road_y, 2);
                     glVertex3f(x_right, road_y, 2);
-                    printf("xleft: %lf xright: %lf\n", x_left, x_right);
 
                     x_left = (road_y + DEVIDER_LEN -y1)*(x3 - x1)/(y2 - y1) + x1;
                     x_right = (road_y + DEVIDER_LEN - y1)*(x4 - x2)/(y2 - y1) + x2;
-                    printf("xleft: %lf xright: %lf\n", x_left, x_right);
-                    printf("\n\n");
-                    //glColor3f(DEVIDER_LIGHT);
-                    //
 
-                    //glColor3f(DEVIDER_DARK);
                     glVertex3f(x_right, road_y+DEVIDER_LEN, 2);
                     glVertex3f(x_left, road_y+DEVIDER_LEN, 2);
-
-                    //glColor3f(DEVIDER_LIGHT);
-                    //
            }glEnd();
 
 
@@ -836,20 +820,21 @@ void display(){
        }glPopMatrix();
 
 
-
-
-    //road partition
-
-
-
-    //ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
     glutSwapBuffers();
 }
 
 void animate(){
     //codes for any changes in Camera
-
-    //cameraAngle += cameraAngleDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
+    if(camera_angle_inc == false){
+        cameraAngle += cameraAngleDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
+        if(cameraAngle >= END_ANGLE)
+            camera_angle_inc =true;
+    }
+    else {
+        cameraAngle -= cameraAngleDelta;
+        if(cameraAngle <= START_ANGLE)
+                    camera_angle_inc =false;
+    }
 
     //codes for any changes in Models
 
@@ -955,7 +940,7 @@ void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of th
 
 void init(){
     //codes for initialization
-    cameraAngle = 4.6;	//// init the cameraAngle
+    cameraAngle = START_ANGLE;	//// init the cameraAngle
     cameraAngleDelta = 0.002;
     rectAngle = 0;
     canDrawGrid = true;
