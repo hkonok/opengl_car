@@ -34,6 +34,13 @@
 #define MAX_CAMERA_HEIGHT 100
 #define MIN_CAMERA_HEIGHT 10
 
+
+#define CAR_POSITION_MIN -18
+#define CAR_POSITION_DELTA 0.2
+#define CAR_POSITION_MAX 38
+
+
+
 #define LAMP_COLOR 0.184, 0.310, 0.310
 #define LIGHT_COLOR 0.914, 0.588, 0.478
 
@@ -53,9 +60,12 @@ double cameraRadius;
 double rectAngle;	//in degree
 double lamp_start;
 
+double car_position;
+
 bool canDrawGrid;
 bool camera_angle_inc;
 bool camera_height_inc;
+
 
 
 bool move_enable;
@@ -64,84 +74,85 @@ double car_move = START_RILL;
 
 GLUquadric *qobj;
 
-void car_top(){
+void car_top(double x, double y){
     //car top
+   // x = 7.5;
     glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-            glVertex3f(0,0,30);
-            glVertex3f(15,0,30);//right low
+            glVertex3f(x-7.5,0,30);
+            glVertex3f(x+7.5,0,30);//right low
             glColor3f(DARK_GREEN);
-            glVertex3f(15,30,30);//right top
-            glVertex3f(0,30,30);
+            glVertex3f(x+7.5,30,30);//right top
+            glVertex3f(x-7.5,30,30);
         }glEnd();
 
      // between top and front glass
         glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-            glVertex3f(0,30,30);
-            glVertex3f(15,30,30);//right low
-            glVertex3f(15,32,28);//right top
-            glVertex3f(0,32,28);
+            glVertex3f(x-7.5,30,30);
+            glVertex3f(x+7.5,30,30);//right low
+            glVertex3f(x+7.5,32,28);//right top
+            glVertex3f(x-7.5,32,28);
         }glEnd();
 
     // between front and back glass
         glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-            glVertex3f(0,0,30);
-            glVertex3f(0,-3,27);
+            glVertex3f(x-7.5,0,30);
+            glVertex3f(x-7.5,-3,27);
 
             glColor3f(DARK_GREEN);
-            glVertex3f(7.5,-3,27);//rihgt low
-            glVertex3f(7.5,0,30);//right top
+            glVertex3f(x,-3,27);//rihgt low
+            glVertex3f(x,0,30);//right top
         }glEnd();
 
         glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-            glVertex3f(15,-3,27);//rihgt low
-            glVertex3f(15,0,30);//right top
+            glVertex3f(x+7.5,-3,27);//rihgt low
+            glVertex3f(x+7.5,0,30);//right top
 
             glColor3f(DARK_GREEN);
-            glVertex3f(7.5,0,30);//right top
-            glVertex3f(7.5,-3,27);//rihgt low
+            glVertex3f(x,0,30);//right top
+            glVertex3f(x,-3,27);//rihgt low
 
         }glEnd();
 }
 
-void front_n_back_glass(){
+void front_n_back_glass(double x, double y){
     // front glass
 
         glBegin(GL_QUADS);{
             glColor3f(DARK_WHITE);
-            glVertex3f(0,32,28);
-            glVertex3f(15,32,28);//right low
+            glVertex3f(x - 7.5,32,28);
+            glVertex3f(x+7.5,32,28);//right low
             glColor3f(LIGHT_WHITE);
-            glVertex3f(19,40,20);//right top
-            glVertex3f(-4,40,20);
+            glVertex3f(x+11.5,40,20);//right top
+            glVertex3f(x-11.5,40,20);
         }glEnd();
 
         // back glass
         glBegin(GL_QUADS);{
             glColor3f(DARK_WHITE);
-            glVertex3f(0,-3,27);
-            glVertex3f(15,-3,27);//right top
+            glVertex3f(x-7.5,-3,27);
+            glVertex3f(x+7.5,-3,27);//right top
             glColor3f(LIGHT_WHITE);
-            glVertex3f(18,-9,20);//right low
-            glVertex3f(-3,-9,20);
+            glVertex3f(x+10.5,-9,20);//right low
+            glVertex3f(x-10.5,-9,20);
         }glEnd();
 }
 
-void top_left_frame(){
+void top_left_frame(double x, double y){
     glBegin(GL_POLYGON);{
             /* Set the vertices */
             glColor3f(LIGHT_GREEN);
             //front glass
-            glVertex3f(-4,40,20);//front right top
-            glVertex3f(0,32,28);//front right low
-            glVertex3f(0,30,30);//between right low
+            glVertex3f(x-11.5,40,20);//front right top
+            glVertex3f(x-7.5,32,28);//front right low
+            glVertex3f(x-7.5,30,30);//between right low
             //middhel of front glass nad top base
             glColor3f(DARK_GREEN);
-            glVertex3f(-0.5,30,28);//right low
-            glVertex3f(-6,40,20);
+            glVertex3f(x-8,30,28);//right low
+            glVertex3f(x-13.5,40,20);
         }glEnd();
 
         //base line
@@ -150,27 +161,27 @@ void top_left_frame(){
                 glColor3f(LIGHT_GREEN);
                 //front glass
 
-                glVertex3f(0,30,30);//between right low
-                glVertex3f(0,0,30);//base right low
+                glVertex3f(x-7.5,30,30);//between right low
+                glVertex3f(x-7.5,0,30);//base right low
 
                 glColor3f(DARK_GREEN);
                 //middhel of front glass nad top base
-                glVertex3f(-.5,0,28);//base right low
-                glVertex3f(-.5,30,28);//right low
+                glVertex3f(x-7,0,28);//base right low
+                glVertex3f(x-7,30,28);//right low
             }glEnd();
 
          // back glass side
             glBegin(GL_POLYGON);{
                 /* Set the vertices */
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(0,0,30);//base right low
-                glVertex3f(0,-3,27);//rihgt low
-                glVertex3f(-3,-9,20);//right low
+                glVertex3f(x-7.5,0,30);//base right low
+                glVertex3f(x-7.5,-3,27);//rihgt low
+                glVertex3f(x-10.5,-9,20);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-6,-9,20);//right low
-                glVertex3f(-0.5,0,28);//base right low
-                glVertex3f(0,0,30);//base right low
+                glVertex3f(x-13.5,-9,20);//right low
+                glVertex3f(x-7,0,28);//base right low
+                glVertex3f(x-7.5,0,30);//base right low
 
             }glEnd();
 
@@ -179,29 +190,29 @@ void top_left_frame(){
             glBegin(GL_POLYGON);{
                 /* Set the vertices */
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-6,-9,20);//right low
-                glVertex3f(-7,-9,18);//right low
+                glVertex3f(x-13.5,-9,20);//right low
+                glVertex3f(x-14.5,-9,18);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-7,40,18);
-                glVertex3f(-6,40,20);//
+                glVertex3f(x-14.5,40,18);
+                glVertex3f(x-13.5,40,20);//
                 //front right top
 
             }glEnd();
 }
 
-void top_right_frame(){
+void top_right_frame(double x,double y){
     glBegin(GL_POLYGON);{
             /* Set the vertices */
             glColor3f(LIGHT_GREEN);
             //front glass
-            glVertex3f(19,40,20);//front right top
-            glVertex3f(15,32,28);//front right low
-            glVertex3f(15,30,30);//between right low
+            glVertex3f(x+11.5,40,20);//front right top
+            glVertex3f(x+7.5,32,28);//front right low
+            glVertex3f(x+7.5,30,30);//between right low
             //middhel of front glass nad top base
             glColor3f(DARK_GREEN);
-            glVertex3f(15.5,30,28);//right low
-            glVertex3f(21,40,20);
+            glVertex3f(x+8,30,28);//right low
+            glVertex3f(x+13.5,40,20);
         }glEnd();
 
         //base line
@@ -210,27 +221,27 @@ void top_right_frame(){
                 glColor3f(LIGHT_GREEN);
                 //front glass
 
-                glVertex3f(15,30,30);//between right low
-                glVertex3f(15,0,30);//base right low
+                glVertex3f(x+7.5,30,30);//between right low
+                glVertex3f(x+7.5,0,30);//base right low
 
                 glColor3f(DARK_GREEN);
                 //middhel of front glass nad top base
-                glVertex3f(15.5,0,28);//base right low
-                glVertex3f(15.5,30,28);//right low
+                glVertex3f(x+8,0,28);//base right low
+                glVertex3f(x+8,30,28);//right low
             }glEnd();
 
          // back glass side
             glBegin(GL_POLYGON);{
                 /* Set the vertices */
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(15,0,30);//base right low
-                glVertex3f(15,-3,27);//rihgt low
-                glVertex3f(18,-9,20);//right low
+                glVertex3f(x+7.5,0,30);//base right low
+                glVertex3f(x+7.5,-3,27);//rihgt low
+                glVertex3f(x+10.5,-9,20);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(21,-9,20);//right low
-                glVertex3f(15.5,0,28);//base right low
-                glVertex3f(15,0,30);//base right low
+                glVertex3f(x+13.5,-9,20);//right low
+                glVertex3f(x+8,0,28);//base right low
+                glVertex3f(x+7.5,0,30);//base right low
 
             }glEnd();
 
@@ -239,37 +250,37 @@ void top_right_frame(){
             glBegin(GL_POLYGON);{
                 /* Set the vertices */
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(21,-9,20);//right low
-                glVertex3f(22,-9,18);//right low
+                glVertex3f(x+13.5,-9,20);//right low
+                glVertex3f(x+14.5,-9,18);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(22,40,18);
-                glVertex3f(21,40,20);//
+                glVertex3f(x+14.5,40,18);
+                glVertex3f(x+13.5,40,20);//
                 //front right top
 
             }glEnd();
 }
 
 
-void right_side_window(){
+void right_side_window(double x, double y){
     //right side front galass window/////////////////////////////////////////////////////////////////////////////////
             glBegin(GL_POLYGON);{
                 glColor3f(DARK_WHITE);
-                glVertex3f(21,40,20);//
+                glVertex3f(x+13.5,40,20);//
 
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(15.5,30,28);//right low
-                glVertex3f(21,30,20);//
+                glVertex3f(x+8,30,28);//right low
+                glVertex3f(x+13.5,30,20);//
                 //front right top
             }glEnd();
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(15.5,30,28);
-                glVertex3f(21,30,20);//
+                glVertex3f(x+8,30,28);
+                glVertex3f(x+13.5,30,20);//
 
                 glColor3f(DARK_WHITE);
-                glVertex3f(21,18,20);//
-                glVertex3f(15.5,17.5,28);//right low
+                glVertex3f(x+13.5,18,20);//
+                glVertex3f(x+8,17.5,28);//right low
             }glEnd();
 
             //right side middle window
@@ -277,46 +288,46 @@ void right_side_window(){
                 /* Set the vertices */
                 glColor3f(DARK_WHITE);
 
-                glVertex3f(15.5, 16.5  , 28);//right low
-                glVertex3f(21  , 16.5  , 20);//
+                glVertex3f(x+8, 16.5  , 28);//right low
+                glVertex3f(x+13.5  , 16.5  , 20);//
 
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(21,1,20);//
-                glVertex3f(15.5,1.5,28);//right low
+                glVertex3f(x+13.5,1,20);//
+                glVertex3f(x+8,1.5,28);//right low
             }glEnd();
 
             //right side back window
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(21,0,20);//
-                glVertex3f(15.5,0.9,28);
-                glVertex3f(15.5,0,28);
+                glVertex3f(x+13.5,0,20);//
+                glVertex3f(x+8,0.9,28);
+                glVertex3f(x+8,0,28);
 
                 glColor3f(DARK_WHITE);
-                glVertex3f(21,-9,20);//right low
+                glVertex3f(x+13.5,-9,20);//right low
             }glEnd();
 }
 
 
-void left_side_window(){
+void left_side_window(double x, double y){
     //right side front galass window/////////////////////////////////////////////////////////////////////////////////
             glBegin(GL_POLYGON);{
                 glColor3f(DARK_WHITE);
-                glVertex3f(-6,40,20);//
+                glVertex3f(x-13.5,40,20);//
 
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(-0.5,30,28);//right low
-                glVertex3f(-6,30,20);//
+                glVertex3f(x-8,30,28);//right low
+                glVertex3f(x-13.5,30,20);//
                 //front right top
             }glEnd();
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(-0.5,30,28);
-                glVertex3f(-6,30,20);//
+                glVertex3f(x-8,30,28);
+                glVertex3f(x-13.5,30,20);//
 
                 glColor3f(DARK_WHITE);
-                glVertex3f(-6,18,20);//
-                glVertex3f(-0.5,17.5,28);//right low
+                glVertex3f(x-13.5,18,20);//
+                glVertex3f(x-8,17.5,28);//right low
             }glEnd();
 
             //right side middle window
@@ -324,155 +335,155 @@ void left_side_window(){
                 /* Set the vertices */
                 glColor3f(DARK_WHITE);
 
-                glVertex3f(-0.5, 16.5  , 28);//right low
-                glVertex3f(-6  , 16.5  , 20);//
+                glVertex3f(x-8, 16.5  , 28);//right low
+                glVertex3f(x-13.5  , 16.5  , 20);//
 
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(-6,1,20);//
-                glVertex3f(-0.5,1.5,28);//right low
+                glVertex3f(x-13.5,1,20);//
+                glVertex3f(x-8,1.5,28);//right low
             }glEnd();
 
             //right side back window
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_WHITE);
-                glVertex3f(-6,0,20);//
-                glVertex3f(-0.5,0.9,28);
-                glVertex3f(-0.5,0,28);
+                glVertex3f(x-13.5,0,20);//
+                glVertex3f(x-8,0.9,28);
+                glVertex3f(x-8,0,28);
 
                 glColor3f(DARK_WHITE);
-                glVertex3f(-6,-9,20);//right low
+                glVertex3f(x-13.5,-9,20);//right low
             }glEnd();
 }
 
 
-void right_side_window_divider(){
+void right_side_window_divider(double x, double y){
              //glass devider one
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(15.5,17.5,28);
-                glVertex3f(15.5, 16.5  , 28);
+                glVertex3f(x+8,17.5,28);
+                glVertex3f(x+8, 16.5  , 28);
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(21  , 16.5  , 20);
-                glVertex3f(21,18,20);
+                glVertex3f(x+13.5 , 16.5  , 20);
+                glVertex3f(x+13.5,18,20);
                 //right low
             }glEnd();
 
             //glass devider two
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(15.5,0.9,28);
-                glVertex3f(15.5,1.5,28);
+                glVertex3f(x+8,0.9,28);
+                glVertex3f(x+8,1.5,28);
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(21,1,20);
-                 glVertex3f(21,0,20);
+                glVertex3f(x+13.5,1,20);
+                 glVertex3f(x+13.5,0,20);
             }glEnd();
 }
 
-void left_side_window_divider(){
+void left_side_window_divider(double x, double y){
              //glass devider one
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-0.5,17.5,28);
-                glVertex3f(-0.5, 16.5  , 28);
+                glVertex3f(x-8,17.5,28);
+                glVertex3f(x-8, 16.5  , 28);
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-6  , 16.5  , 20);
-                glVertex3f(-6,18,20);
+                glVertex3f(x-13.5  , 16.5  , 20);
+                glVertex3f(x-13.5,18,20);
                 //right low
             }glEnd();
 
             //glass devider two
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-0.5,0.9,28);
-                glVertex3f(-0.5,1.5,28);
+                glVertex3f(x-8,0.9,28);
+                glVertex3f(x-8,1.5,28);
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-6,1,20);
-                 glVertex3f(-6,0,20);
+                glVertex3f(x-13.5,1,20);
+                 glVertex3f(x-13.5,0,20);
             }glEnd();
 }
 
-void back_side_body(){
+void back_side_body(double x,double y){
     //back side of back glass
             glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(21,-9,20);//right low
-                glVertex3f(-6,-9,20);//right low
+                glVertex3f(x+13.5,-9,20);//right low
+                glVertex3f(x-13.5,-9,20);//right low
 
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-7,-9,18);//right low
-                glVertex3f(22,-9,18);//right low
+                glVertex3f(x-14.5,-9,18);//right low
+                glVertex3f(x+14.5,-9,18);//right low
             }glEnd();
 
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-7,-9,18);//right low
-                glVertex3f(22,-9,18);//right low
+                glVertex3f(x-14.5,-9,18);//right low
+                glVertex3f(x+14.5,-9,18);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(22,-10,15);//right low
-                glVertex3f(-7,-10,15);//right low
+                glVertex3f(x+14.5,-10,15);//right low
+                glVertex3f(x-14.5,-10,15);//right low
             }glEnd();
 
             // red light left
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_RED);
-                glVertex3f(-1.5,-10,15);//right low
-                glVertex3f(-7,-10,15);//right low
+                glVertex3f(x-9,-10,15);//right low
+                glVertex3f(x-14.5,-10,15);//right low
 
                 glColor3f(DARK_RED);
-                glVertex3f(-7,-10.2,11.2);//right low
-                glVertex3f(-1.5,-10.2,11.2);//right low
+                glVertex3f(x-14.5,-10.2,11.2);//right low
+                glVertex3f(x-9,-10.2,11.2);//right low
             }glEnd();
 
             // red light right
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_RED);
-                glVertex3f(16.5,-10,15);//right low
-                glVertex3f(22,-10,15);//right low
+                glVertex3f(x+9,-10,15);//right low
+                glVertex3f(x+14.5,-10,15);//right low
 
                 glColor3f(DARK_RED);
-                glVertex3f(22,-10.2,11.2);//right low
-                glVertex3f(16.5,-10.2,11.2);//right low
+                glVertex3f(x+14.5,-10.2,11.2);//right low
+                glVertex3f(x+9,-10.2,11.2);//right low
             }glEnd();
 
 
 
             //number board
             glBegin(GL_QUADS);{
-                glColor3f(0.502, 0.502, 0.502);
-                glVertex3f(3.5, -10.04, 15);//right low
-                glVertex3f(11.5, -10.04, 15);//right low
+                glColor3f(x-6.998, 0.502, 0.502);
+                glVertex3f(x-4, -10.04, 15);//right low
+                glVertex3f(x+4, -10.04, 15);//right low
 
-                glColor3f(0.933, 0.910, 0.667);
-                glVertex3f(11.5, -10.24, 11.2);//right low
-                glVertex3f(3.5, -10.24, 11.2);//right low
+                glColor3f(x-6.502, 0.910, 0.667);
+                glVertex3f(x+4, -10.24, 11.2);//right low
+                glVertex3f(x-4, -10.24, 11.2);//right low
 
             }glEnd();
             // place between two lines
             glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(16.5,-10,15);//right low
-                glVertex3f(-1.5,-10,15);//right low
+                glVertex3f(x+9,-10,15);//right low
+                glVertex3f(x-9,-10,15);//right low
 
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-1.5,-10.2,11.2);//right low
-                glVertex3f(16.5,-10.2,11.2);//right low
+                glVertex3f(x-9,-10.2,11.2);//right low
+                glVertex3f(x+9,-10.2,11.2);//right low
 
             }glEnd();
 
             //last part of back side
             glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(22,-10.2,11.2);//right low
-                glVertex3f(-7,-10.2,11.2);//right low
+                glVertex3f(x+14.5,-10.2,11.2);//right low
+                glVertex3f(x-14.5,-10.2,11.2);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-7,-10.5,7);//right low
-                glVertex3f(22.5,-10.5,7);//right low
+                glVertex3f(x-14.5,-10.5,7);//right low
+                glVertex3f(x+15,-10.5,7);//right low
 
             }glEnd();
 }
@@ -507,121 +518,121 @@ void create_wheel(double x, double y, double z, double radious, double width){
     create_triangle(x,y, z, radious, 0.3);
 }
 
-void front_body()
+void front_body(double x, double y)
 {
     //between front and front glass
         glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(21,40,20);//right low
-                glVertex3f(-6,40,20);//right low
+                glVertex3f(x+13.5,40,20);//right low
+                glVertex3f(x-13.5,40,20);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-7,40,18);//right low
-                glVertex3f(22,40,18);//right low
+                glVertex3f(x-14.5,40,18);//right low
+                glVertex3f(x+14.5,40,18);//right low
             }glEnd();
         //front hood
         glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(-7,40,18);//right low
-                glVertex3f(22,40,18);//right low
+                glVertex3f(x-14.5,40,18);//right low
+                glVertex3f(x+14.5,40,18);//right low
 
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(21,52,15);//right low
-                glVertex3f(-6,52,15);//right low
+                glVertex3f(x+13.5,52,15);//right low
+                glVertex3f(x-13.5,52,15);//right low
             }glEnd();
         //small curv after front hood
         glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-6,52,15);//right low
-                glVertex3f(21,52,15);//right low
+                glVertex3f(x-13.5,52,15);//right low
+                glVertex3f(x+13.5,52,15);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(21,53,12);//right low
-                glVertex3f(-6,53,12);//right low
+                glVertex3f(x+13.5,53,12);//right low
+                glVertex3f(x-13.5,53,12);//right low
             }glEnd();
         //front end
         glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(-6,53,12);//right low
-                glVertex3f(21,53,12);//right low
+                glVertex3f(x-13.5,53,12);//right low
+                glVertex3f(x+13.5,53,12);//right low
 
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(21,54,7);//right low
-                glVertex3f(-6,54,7);//right low
+                glVertex3f(x+13.5,54,7);//right low
+                glVertex3f(x-13.5,54,7);//right low
             }glEnd();
 
        //front right
        glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(21,54,7);//right low
-                glVertex3f(21,53,12);//right low
-                glVertex3f(21,52,15);//right low
-                glVertex3f(22,40,18);//right low
-                glVertex3f(21,40,7);//right low
+                glVertex3f(x+13.5,54,7);//right low
+                glVertex3f(x+13.5,53,12);//right low
+                glVertex3f(x+13.5,52,15);//right low
+                glVertex3f(x+14.5,40,18);//right low
+                glVertex3f(x+13.5,40,7);//right low
        }glEnd();
 
        //front left
        glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(-6,54,7);//right low
-                glVertex3f(-6,53,12);//right low
-                glVertex3f(-6,52,15);//right low
-                glVertex3f(-7,40,18);//right low
-                glVertex3f(-6,40,7);//right low
+                glVertex3f(x-13.5,54,7);//right low
+                glVertex3f(x-13.5,53,12);//right low
+                glVertex3f(x-13.5,52,15);//right low
+                glVertex3f(x-14.5,40,18);//right low
+                glVertex3f(x-13.5,40,7);//right low
        }glEnd();
 
 }
 
-void car_doors(){
+void car_doors(double x, double y){
      //doors right
        glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(22,40,18);//right low
+                glVertex3f(x+14.5,40,18);//right low
                 glColor3f(LIGHT_GREEN);
-                 glVertex3f(22,10,18);//right low
+                 glVertex3f(x+14.5,10,18);//right low
 
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(21,10,7);//right low
-                glVertex3f(21,40,7);//right low
+                glVertex3f(x+13.5,10,7);//right low
+                glVertex3f(x+13.5,40,7);//right low
 
        }glEnd();
         glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(22,10,18);//right low
-                glVertex3f(22,-9,18);//right low
-                glVertex3f(22,-10,15);//right low
+                glVertex3f(x+14.5,10,18);//right low
+                glVertex3f(x+14.5,-9,18);//right low
+                glVertex3f(x+14.5,-10,15);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(22,-10.2,11.2);//right low
-                glVertex3f(22.5, -10.5, 7);//right low
-                glVertex3f(21,10,7);//right low
+                glVertex3f(x+14.5,-10.2,11.2);//right low
+                glVertex3f(x+15, -10.5, 7);//right low
+                glVertex3f(x+13.5,10,7);//right low
 
        }glEnd();
 
         //doors left
        glBegin(GL_POLYGON);{
                 glColor3f(DARK_GREEN);
-                glVertex3f(-7,40,18);//right low
+                glVertex3f(x-14.5,40,18);//right low
                 glColor3f(LIGHT_GREEN);
-                 glVertex3f(-7,10,18);//right low
+                 glVertex3f(x-14.5,10,18);//right low
 
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-6,10,7);//right low
-                glVertex3f(-6,40,7);//right low
+                glVertex3f(x-13.5,10,7);//right low
+                glVertex3f(x-13.5,40,7);//right low
 
        }glEnd();
         glBegin(GL_POLYGON);{
                 glColor3f(LIGHT_GREEN);
-                glVertex3f(-7,10,18);//right low
-                glVertex3f(-7,-9,18);//right low
-                glVertex3f(-7,-10,15);//right low
+                glVertex3f(x-14.5,10,18);//right low
+                glVertex3f(x-14.5,-9,18);//right low
+                glVertex3f(x-14.5,-10,15);//right low
 
                 glColor3f(DARK_GREEN);
-                glVertex3f(-7,-10.2,11.2);//right low
-                glVertex3f(-7, -10.5, 7);//right low
-                glVertex3f(-6,10,7);//right low
+                glVertex3f(x-14.5,-10.2,11.2);//right low
+                glVertex3f(x-14.5, -10.5, 7);//right low
+                glVertex3f(x-13.5,10,7);//right low
 
        }glEnd();
 }
@@ -747,27 +758,28 @@ void draw_sky(){
 
 }
 
-void draw_car(){
-    car_top();
-    front_n_back_glass();
+void draw_car(double x, double y){
 
-    top_right_frame();
-    right_side_window();
-    right_side_window_divider();
+    car_top(x,y);
+    front_n_back_glass(x,y);
 
-    top_left_frame();
-    left_side_window();
-    left_side_window_divider();
+    top_right_frame(x,y);
+    right_side_window(x,y);
+    right_side_window_divider(x,y);
 
-    back_side_body();
-    front_body();
+    top_left_frame(x,y);
+    left_side_window(x,y);
+    left_side_window_divider(x,y);
 
-    car_doors();
-    create_wheel(20, 0, 7, 6, 4);
-    create_wheel(-9, 0, 7, 6, 4);
+    back_side_body(x,y);
+    front_body(x,y);
 
-    create_wheel(20, 30, 7, 6, 4);
-    create_wheel(-9, 30, 7, 6, 4);
+    car_doors(x,y);
+    create_wheel(x+12.5, 0, 7, 6, 4);
+    create_wheel(x-16.5, 0, 7, 6, 4);
+
+    create_wheel(x+12.5, 30, 7, 6, 4);
+    create_wheel(x-16.5, 30, 7, 6, 4);
 }
 
 void create_lamp(double x,double y,double z,double height){
@@ -876,7 +888,7 @@ void display(){
     //again select MODEL-VIEW
     glMatrixMode(GL_MODELVIEW);
 
-        draw_car();
+        draw_car(car_position,0);
 
         draw_road();
 
@@ -1000,9 +1012,19 @@ void keyboardListener(unsigned char key, int x,int y){
         case '3':	//decrease rotation
           //  cameraAngleDelta /= 1.1;
             break;
+
+        case '4':
+            if(car_position> CAR_POSITION_MIN)
+                car_position -= CAR_POSITION_DELTA;
+            break;
+
         case '5':
               move_enable = false;
               break;
+        case '6':
+            if(car_position< CAR_POSITION_MAX)
+                car_position += CAR_POSITION_DELTA;
+            break;
 
         case '8':	//toggle grids
            // canDrawGrid = 1 - canDrawGrid;
@@ -1087,6 +1109,8 @@ void init(){
     camera_height_inc = true;
     cameraRadius = 180;
     move_enable = true;
+
+    car_position = 7.5;
     //clear the screen
     glClearColor(WHITE, 0);
 
