@@ -19,6 +19,11 @@
 #define DEEP_DARK_WHITE 0.412, 0.412, 0.412
 
 
+#define START_RILL 45
+#define RILL_DELTA 2
+#define DEVIDER_LEN 25
+
+
 #define SKY_TOP 1.000, 1.000, 1.000
 
 //make a global variable -- for tracking the anglular position of camera
@@ -32,43 +37,45 @@ double rectAngle;	//in degree
 
 bool canDrawGrid;
 
+double car_move = START_RILL;
+
 GLUquadric*  	qobj;
 
 void car_top(){
     //car top
     glBegin(GL_QUADS);{
-		    glColor3f(LIGHT_GREEN);
-			glVertex3f(0,0,30);
-			glVertex3f(15,0,30);//right low
-			glColor3f(DARK_GREEN);
-			glVertex3f(15,30,30);//right top
-			glVertex3f(0,30,30);
-		}glEnd();
+            glColor3f(LIGHT_GREEN);
+            glVertex3f(0,0,30);
+            glVertex3f(15,0,30);//right low
+            glColor3f(DARK_GREEN);
+            glVertex3f(15,30,30);//right top
+            glVertex3f(0,30,30);
+        }glEnd();
 
      // between top and front glass
-		glBegin(GL_QUADS);{
+        glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-			glVertex3f(0,30,30);
-			glVertex3f(15,30,30);//right low
-			glVertex3f(15,32,28);//right top
-			glVertex3f(0,32,28);
-		}glEnd();
+            glVertex3f(0,30,30);
+            glVertex3f(15,30,30);//right low
+            glVertex3f(15,32,28);//right top
+            glVertex3f(0,32,28);
+        }glEnd();
 
     // between front and back glass
-		glBegin(GL_QUADS);{
+        glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-			glVertex3f(0,0,30);
-			glVertex3f(0,-3,27);
+            glVertex3f(0,0,30);
+            glVertex3f(0,-3,27);
 
             glColor3f(DARK_GREEN);
             glVertex3f(7.5,-3,27);//rihgt low
             glVertex3f(7.5,0,30);//right top
-		}glEnd();
+        }glEnd();
 
-		glBegin(GL_QUADS);{
+        glBegin(GL_QUADS);{
             glColor3f(LIGHT_GREEN);
-			glVertex3f(15,-3,27);//rihgt low
-			glVertex3f(15,0,30);//right top
+            glVertex3f(15,-3,27);//rihgt low
+            glVertex3f(15,0,30);//right top
 
             glColor3f(DARK_GREEN);
             glVertex3f(7.5,0,30);//right top
@@ -80,24 +87,24 @@ void car_top(){
 void front_n_back_glass(){
     // front glass
 
-		glBegin(GL_QUADS);{
+        glBegin(GL_QUADS);{
             glColor3f(DARK_WHITE);
-			glVertex3f(0,32,28);
-			glVertex3f(15,32,28);//right low
-			glColor3f(LIGHT_WHITE);
-			glVertex3f(19,40,20);//right top
-			glVertex3f(-4,40,20);
-		}glEnd();
+            glVertex3f(0,32,28);
+            glVertex3f(15,32,28);//right low
+            glColor3f(LIGHT_WHITE);
+            glVertex3f(19,40,20);//right top
+            glVertex3f(-4,40,20);
+        }glEnd();
 
         // back glass
-		glBegin(GL_QUADS);{
+        glBegin(GL_QUADS);{
             glColor3f(DARK_WHITE);
-			glVertex3f(0,-3,27);
-			glVertex3f(15,-3,27);//right top
-			glColor3f(LIGHT_WHITE);
-			glVertex3f(18,-9,20);//right low
-			glVertex3f(-3,-9,20);
-		}glEnd();
+            glVertex3f(0,-3,27);
+            glVertex3f(15,-3,27);//right top
+            glColor3f(LIGHT_WHITE);
+            glVertex3f(18,-9,20);//right low
+            glVertex3f(-3,-9,20);
+        }glEnd();
 }
 
 void top_left_frame(){
@@ -599,54 +606,54 @@ void car_doors(){
 
 void display(){
 
-	//clear the display
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(WHITE, 0);	//color black
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //clear the display
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(WHITE, 0);	//color black
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/********************
-	/ set-up camera here
-	********************/
-	//load the correct matrix -- MODEL-VIEW matrix
-	glMatrixMode(GL_MODELVIEW);
+    /********************
+    / set-up camera here
+    ********************/
+    //load the correct matrix -- MODEL-VIEW matrix
+    glMatrixMode(GL_MODELVIEW);
 
-	//initialize the matrix
-	glLoadIdentity();
-	//now give three info
-	//1. where is the camera (viewer)?
-	//2. where is the camera is looking?
-	//3. Which direction is the camera's UP direction?
+    //initialize the matrix
+    glLoadIdentity();
+    //now give three info
+    //1. where is the camera (viewer)?
+    //2. where is the camera is looking?
+    //3. Which direction is the camera's UP direction?
 
-	//instead of CONSTANT information, we will define a circular path.
+    //instead of CONSTANT information, we will define a circular path.
 //	gluLookAt(-30,-30,50,	0,0,0,	0,0,1);
 
-	gluLookAt(cameraRadius*cos(cameraAngle), cameraRadius*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
-	//NOTE: the camera still CONSTANTLY looks at the center
-	// cameraAngle is in RADIAN, since you are using inside COS and SIN
+    gluLookAt(cameraRadius*cos(cameraAngle), cameraRadius*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
+    //NOTE: the camera still CONSTANTLY looks at the center
+    // cameraAngle is in RADIAN, since you are using inside COS and SIN
 
 
-	//again select MODEL-VIEW
-	glMatrixMode(GL_MODELVIEW);
+    //again select MODEL-VIEW
+    glMatrixMode(GL_MODELVIEW);
 
 
-	/****************************
-	/ Add your objects from here
-	****************************/
-	//add objects
-	//rotate this rectangle around the Z axis
+    /****************************
+    / Add your objects from here
+    ****************************/
+    //add objects
+    //rotate this rectangle around the Z axis
 
 //	glPushMatrix();{
-	    //drawing car
+        //drawing car
         car_top();
         front_n_back_glass();
 
-		top_right_frame();
-		right_side_window();
-		right_side_window_divider();
+        top_right_frame();
+        right_side_window();
+        right_side_window_divider();
 
-		top_left_frame();
-		left_side_window();
-		left_side_window_divider();
+        top_left_frame();
+        left_side_window();
+        left_side_window_divider();
 
         back_side_body();
         front_body();
@@ -765,9 +772,11 @@ void display(){
                 glVertex3f(-900,-400,200);
        }glEnd();
 
+
+
   //  }glPopMatrix();		//the effect of rotation is not there now.
-	//create wheel
-	//create_wheel(double x, double y, double z, double radious, double width)
+    //create wheel
+    //create_wheel(double x, double y, double z, double radious, double width)
 
     create_wheel(20, 0, 7, 6, 4);
     create_wheel(-9, 0, 7, 6, 4);
@@ -775,174 +784,233 @@ void display(){
     create_wheel(20, 30, 7, 6, 4);
     create_wheel(-9, 30, 7, 6, 4);
 
+/*
+    glBegin(GL_POLYGON);{
+            glColor3f(0,0,0);
+            glVertex3f(-4, -400, 2.5);
+            glVertex3f(1, 1000, 2.5);
+
+            glVertex3f(-1, 1000, 2.5);
+            glVertex3f(4, -400, 2.5);
+   }glEnd();
+   */
+
+    glPushMatrix();
+    {
+
+        for(double road_y = -400+car_move; road_y <= 950 ; road_y+=START_RILL){
+            double x_left,x_right,x1,x2,x3,x4,y,y1,y2;
+            x1 = 13;
+            x2 = 17;
+            x3 = -0.3;
+            x4 = 0.3;
+            y1 = -400;
+            y2 = 1000;
+
+            x_left = (road_y-y1)*(x3 - x1)/(y2 - y1) + x1;
+            x_right = (road_y - y1)*(x4 - x2)/(y2 - y1) + x2;
+
+            glBegin(GL_POLYGON);{
+                    glColor3f(DEEP_DARK_WHITE);
+                    glVertex3f(x_left, road_y, 2);
+                    glVertex3f(x_right, road_y, 2);
+                    printf("xleft: %lf xright: %lf\n", x_left, x_right);
+
+                    x_left = (road_y + DEVIDER_LEN -y1)*(x3 - x1)/(y2 - y1) + x1;
+                    x_right = (road_y + DEVIDER_LEN - y1)*(x4 - x2)/(y2 - y1) + x2;
+                    printf("xleft: %lf xright: %lf\n", x_left, x_right);
+                    printf("\n\n");
+                    //glColor3f(DEVIDER_LIGHT);
+                    //
+
+                    //glColor3f(DEVIDER_DARK);
+                    glVertex3f(x_right, road_y+DEVIDER_LEN, 2);
+                    glVertex3f(x_left, road_y+DEVIDER_LEN, 2);
+
+                    //glColor3f(DEVIDER_LIGHT);
+                    //
+           }glEnd();
 
 
-	int i;
+        }
+       }glPopMatrix();
 
 
 
-	//ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
-	glutSwapBuffers();
+
+    //road partition
+
+
+
+    //ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
+    glutSwapBuffers();
 }
 
 void animate(){
-	//codes for any changes in Camera
+    //codes for any changes in Camera
 
-	//cameraAngle += cameraAngleDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
+    //cameraAngle += cameraAngleDelta;	// camera will rotate at 0.002 radians per frame.	// keep the camera steady NOW!!
 
-	//codes for any changes in Models
+    //codes for any changes in Models
 
-	rectAngle -= 1;
+    if(car_move <= 0){
+        car_move = START_RILL;
+    }
+    else{
+        car_move -= RILL_DELTA;
+    }
 
-	//MISSING SOMETHING? -- YES: add the following
-	glutPostRedisplay();	//this will call the display AGAIN
+    rectAngle -= 1;
+
+    //MISSING SOMETHING? -- YES: add the following
+    glutPostRedisplay();	//this will call the display AGAIN
 }
 
 void keyboardListener(unsigned char key, int x,int y){
-	switch(key){
+    switch(key){
 
-		case '1':	//reverse the rotation of camera
-			cameraAngleDelta = -cameraAngleDelta;
-			break;
+        case '1':	//reverse the rotation of camera
+            cameraAngleDelta = -cameraAngleDelta;
+            break;
 
-		case '2':	//increase rotation of camera by 10%
-			cameraAngleDelta *= 1.1;
-			break;
+        case '2':	//increase rotation of camera by 10%
+            cameraAngleDelta *= 1.1;
+            break;
 
-		case '3':	//decrease rotation
-			cameraAngleDelta /= 1.1;
-			break;
+        case '3':	//decrease rotation
+            cameraAngleDelta /= 1.1;
+            break;
 
-		case '8':	//toggle grids
-			canDrawGrid = 1 - canDrawGrid;
-			break;
+        case '8':	//toggle grids
+            canDrawGrid = 1 - canDrawGrid;
+            break;
 
-		case 27:	//ESCAPE KEY -- simply exit
-			exit(0);
-			break;
+        case 27:	//ESCAPE KEY -- simply exit
+            exit(0);
+            break;
 
-		default:
-			break;
-	}
+        default:
+            break;
+    }
 }
 
 void specialKeyListener(int key, int x,int y){
-	switch(key){
-		case GLUT_KEY_DOWN:		//down arrow key
-			cameraRadius += 10;
-			break;
-		case GLUT_KEY_UP:		// up arrow key
-		   if(cameraRadius > 10)
-				cameraRadius -= 10;
-			break;
+    switch(key){
+        case GLUT_KEY_DOWN:		//down arrow key
+            cameraRadius += 10;
+            break;
+        case GLUT_KEY_UP:		// up arrow key
+           if(cameraRadius > 10)
+                cameraRadius -= 10;
+            break;
 
-		case GLUT_KEY_RIGHT:
+        case GLUT_KEY_RIGHT:
             cameraAngle += cameraAngleDelta*10;
-			break;
-		case GLUT_KEY_LEFT:
+            break;
+        case GLUT_KEY_LEFT:
             cameraAngle -= cameraAngleDelta*10;
-			break;
+            break;
 
-		case GLUT_KEY_PAGE_UP:
-			cameraHeight += 10;
-			break;
-		case GLUT_KEY_PAGE_DOWN:
-			cameraHeight -= 10;
-			break;
+        case GLUT_KEY_PAGE_UP:
+            cameraHeight += 10;
+            break;
+        case GLUT_KEY_PAGE_DOWN:
+            cameraHeight -= 10;
+            break;
 
-		case GLUT_KEY_INSERT:
-			break;
+        case GLUT_KEY_INSERT:
+            break;
 
-		case GLUT_KEY_HOME:
-			break;
-		case GLUT_KEY_END:
-			break;
+        case GLUT_KEY_HOME:
+            break;
+        case GLUT_KEY_END:
+            break;
 
-		default:
-			break;
-	}
+        default:
+            break;
+    }
 }
 
 void mouseListener(int button, int state, int x, int y){	//x, y is the x-y of the screen (2D)
-	switch(button){
-		case GLUT_LEFT_BUTTON:
-			if(state == GLUT_DOWN){		// 2 times?? in ONE click? -- solution is checking DOWN or UP
-				cameraAngleDelta = -cameraAngleDelta;
-			}
-			break;
+    switch(button){
+        case GLUT_LEFT_BUTTON:
+            if(state == GLUT_DOWN){		// 2 times?? in ONE click? -- solution is checking DOWN or UP
+                cameraAngleDelta = -cameraAngleDelta;
+            }
+            break;
 
-		case GLUT_RIGHT_BUTTON:
-			//........
-			break;
+        case GLUT_RIGHT_BUTTON:
+            //........
+            break;
 
-		case GLUT_MIDDLE_BUTTON:
-			//........
-			break;
+        case GLUT_MIDDLE_BUTTON:
+            //........
+            break;
 
-		default:
-			break;
-	}
+        default:
+            break;
+    }
 }
 
 
 void init(){
-	//codes for initialization
-	cameraAngle = 4.6;	//// init the cameraAngle
-	cameraAngleDelta = 0.002;
-	rectAngle = 0;
-	canDrawGrid = true;
-	cameraHeight = 120;
-	cameraRadius = 180;
+    //codes for initialization
+    cameraAngle = 4.6;	//// init the cameraAngle
+    cameraAngleDelta = 0.002;
+    rectAngle = 0;
+    canDrawGrid = true;
+    cameraHeight = 120;
+    cameraRadius = 180;
 
-	//clear the screen
-	glClearColor(WHITE, 0);
+    //clear the screen
+    glClearColor(WHITE, 0);
 
-	// cylinder
+    // cylinder
     qobj = gluNewQuadric();
     gluQuadricNormals(qobj, GLU_SMOOTH);
-	/************************
-	/ set-up projection here
-	************************/
-	//load the PROJECTION matrix
-	glMatrixMode(GL_PROJECTION);
+    /************************
+    / set-up projection here
+    ************************/
+    //load the PROJECTION matrix
+    glMatrixMode(GL_PROJECTION);
 
-	//initialize the matrix
-	glLoadIdentity();
+    //initialize the matrix
+    glLoadIdentity();
 
-	//give PERSPECTIVE parameters
-	gluPerspective(70,	1,	0.1,	10000.0);
-	//field of view in the Y (vertically)
-	//aspect ratio that determines the field of view in the X direction (horizontally)
-	//near distance
-	//far distance
+    //give PERSPECTIVE parameters
+    gluPerspective(70,	1,	0.1,	10000.0);
+    //field of view in the Y (vertically)
+    //aspect ratio that determines the field of view in the X direction (horizontally)
+    //near distance
+    //far distance
 }
 
 int main(int argc, char **argv){
-	glutInit(&argc,argv);
-	glutInitWindowSize(1000, 700);
-	glutInitWindowPosition(0, 0);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);	//Depth, Double buffer, RGB color
+    glutInit(&argc,argv);
+    glutInitWindowSize(1000, 700);
+    glutInitWindowPosition(0, 0);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);	//Depth, Double buffer, RGB color
 
-	glutCreateWindow("My OpenGL Program");
+    glutCreateWindow("My OpenGL Program");
 
-	init();
+    init();
 
-	glEnable(GL_DEPTH_TEST);	//enable Depth Testing
+    glEnable(GL_DEPTH_TEST);	//enable Depth Testing
 
-	glutDisplayFunc(display);	//display callback function
-	glutIdleFunc(animate);		//what you want to do in the idle time (when no drawing is occuring)
+    glutDisplayFunc(display);	//display callback function
+    glutIdleFunc(animate);		//what you want to do in the idle time (when no drawing is occuring)
 
-	//ADD keyboard listeners:
-	glutKeyboardFunc(keyboardListener);
-	glutSpecialFunc(specialKeyListener);
+    //ADD keyboard listeners:
+    glutKeyboardFunc(keyboardListener);
+    glutSpecialFunc(specialKeyListener);
 
-	//ADD mouse listeners:
-	glutMouseFunc(mouseListener);
+    //ADD mouse listeners:
+    glutMouseFunc(mouseListener);
 
-	glutMainLoop();		//The main loop of OpenGL
+    glutMainLoop();		//The main loop of OpenGL
 
     //cleanup
-	gluDeleteQuadric(qobj);
+    gluDeleteQuadric(qobj);
 
-	return 0;
+    return 0;
 }
